@@ -17,6 +17,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   // Enable CORS
+  // TODO: Add specific domains to whitelist
   app.enableCors();
 
   // Set global prefix
