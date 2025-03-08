@@ -176,7 +176,7 @@ export class LobbyService {
     // wait for 25 seconds before starting a new lobby
     setTimeout(() => {
       void this.startNewLobby();
-    }, 25000);
+    }, 10000);
   }
 
   private async awardPoints(): Promise<void> {
@@ -197,8 +197,6 @@ export class LobbyService {
 
   async getLeaderboard(): Promise<LeaderboardResponseDto> {
     const leaderboard = await this.userService.getTopPlayers(10);
-
-    console.log('THIS IS LEADERBOARD', leaderboard);
 
     return {
       leaderboard: leaderboard.map((entry, index) => ({

@@ -7,7 +7,6 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { MongoError } from 'mongodb';
-import _ from 'lodash';
 
 import { Request, Response } from 'express';
 
