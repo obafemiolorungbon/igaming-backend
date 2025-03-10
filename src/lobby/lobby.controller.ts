@@ -44,22 +44,27 @@ export class LobbyController {
     type: String,
     description: 'JWT token',
   })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
   events(@Req() req: UserReq): Observable<LobbyEvent & { username: string }> {
-    const username = req.user.username;
+    try {
+      const username = req.user.username;
 
-    return new Observable((subscriber) => {
-      const subscription = this.eventsService.subscribe((event) => {
-        subscriber.next({
-          ...event,
-          username,
+      return new Observable((subscriber) => {
+        const subscription = this.eventsService.subscribe((event) => {
+          subscriber.next({
+            ...event,
+            username,
+          });
         });
-      });
 
-      // Cleanup subscription when client disconnects
-      return () => {
-        subscription.unsubscribe();
-      };
-    });
+        // Cleanup subscription when client disconnects
+        return () => {
+          subscription.unsubscribe();
+        };
+      });
+    } catch (error) {
+      throw new Error(error);
+    }
   }
 
   @Get('leaderboard')
@@ -67,8 +72,13 @@ export class LobbyController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get top 10 players leaderboard' })
   @ApiResponse({ status: 200, type: LeaderboardResponseDto })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
   async getLeaderboard(): Promise<LeaderboardResponseDto> {
-    return this.lobbyService.getLeaderboard();
+    try {
+      return this.lobbyService.getLeaderboard();
+    } catch (error) {
+      throw new Error(error);
+    }
   }
 
   @Post('join')
@@ -80,8 +90,13 @@ export class LobbyController {
     status: 400,
     description: 'Lobby is not active or has expired',
   })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
   async joinLobby(@Req() req: UserReq): Promise<LobbyResponseDto> {
-    return this.lobbyService.joinLobby(req.user.username);
+    try {
+      return this.lobbyService.joinLobby(req.user.username);
+    } catch (error) {
+      throw new Error(error);
+    }
   }
 
   @Post('select')
@@ -89,15 +104,18 @@ export class LobbyController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Select a lucky number for the current lobby' })
   @ApiResponse({ status: 200, type: SelectNumberDto })
-  @ApiResponse({
-    status: 400,
-    description: 'Please Select a lucky number',
-  })
+  @ApiResponse({ status: 400, description: 'Please Select a lucky number' })
+  @ApiResponse({ status: 404, description: 'Lobby not found or not active' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
   async selectNumber(
     @Req() req: UserReq,
     @Body() selectNumberDto: SelectNumberDto,
   ): Promise<LobbyResponseDto> {
-    return this.lobbyService.selectNumber(req.user.username, selectNumberDto);
+    try {
+      return this.lobbyService.selectNumber(req.user.username, selectNumberDto);
+    } catch (error) {
+      throw new Error(error);
+    }
   }
 
   @Get('active')
@@ -105,8 +123,13 @@ export class LobbyController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get current active lobby' })
   @ApiResponse({ status: 200, type: ActiveLobbyResponseDto })
+  @ApiResponse({ status: 404, description: 'No active lobby found' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
   getActiveLobbies(@Req() req: UserReq): ActiveLobbyResponseDto {
-    const username = req.user.username;
-    return this.lobbyService.getActiveLobby(username);
+    try {
+      return this.lobbyService.getActiveLobby(req.user.username);
+    } catch (error) {
+      throw new Error(error);
+    }
   }
 }
