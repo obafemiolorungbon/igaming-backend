@@ -91,15 +91,23 @@ export class LobbyService {
     }
 
     // TODO: implement logic
-    // if (this.currentLobby.players.includes(username)) {
-    //   throw new BadRequestException('User already in lobby');
-    // }
+    const isAlreadyInLobby = this.currentLobby.players.some(
+      (player) => player.user.username === username,
+    );
+
+    if (isAlreadyInLobby) {
+      throw new BadRequestException('You are already in the lobby');
+    }
     // get user
     const User = await this.userService.getUserProfile(username);
 
-    this.currentLobby.players.push({ user: User });
-    this.currentLobby.playerCount += 1;
-    await this.currentLobby.save();
+    try {
+      this.currentLobby.players.push({ user: User });
+      this.currentLobby.playerCount += 1;
+      await this.currentLobby.save();
+    } catch (__) {
+      throw new BadRequestException('Error joining lobby');
+    }
 
     this.eventsService.emitPlayerJoined(
       username,
@@ -173,10 +181,10 @@ export class LobbyService {
 
     await this.awardPoints();
 
-    // wait for 25 seconds before starting a new lobby
+    // wait for 5 seconds before starting a new lobby
     setTimeout(() => {
       void this.startNewLobby();
-    }, 10000);
+    }, 5000);
   }
 
   private async awardPoints(): Promise<void> {
